@@ -4,52 +4,203 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>文言尋字</title>
+<title>文言尋字｜古籍單字探索</title>
 <style>
-body{font-family:serif;background:#f7f5ee;color:#20332d;margin:0;padding:22px}
-main{max-width:720px;margin:auto}
-h1{color:#315d4b}
-input,button{font-size:18px;padding:12px;border-radius:8px}
-input{width:55%;border:1px solid #bbb}
-button{background:#315d4b;color:white;border:0}
-.card{background:white;padding:18px;margin:14px 0;border-radius:12px;line-height:1.9}
-.hit{color:#b0782c;font-weight:bold}
-.small{color:#68766f}
+:root{--green:#315d4b;--paper:#f7f5ee;--ink:#24352e;--muted:#68766f;--gold:#bd9147}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Serif TC","Songti TC",serif}
+header{background:#eaece1;padding:25px 18px;border-bottom:1px solid #dce0d3}
+.head,main{max-width:850px;margin:auto}
+h1{margin:0;font-size:30px;letter-spacing:3px;color:var(--green)}
+header p{margin:8px 0 0;color:var(--muted);line-height:1.8}
+main{padding:22px 15px 50px}
+.panel,.card{background:#fffefa;border:1px solid #e1e3d9;border-radius:13px;padding:18px;margin-bottom:15px}
+label{display:block;font-size:14px;color:var(--muted);margin-bottom:8px}
+input,select,button{font:inherit;border-radius:8px}
+input,select{padding:12px;border:1px solid #cbd3c9;background:white;color:var(--ink);min-width:0}
+#word{width:100%;font-size:21px}
+button{border:0;padding:12px 16px;background:var(--green);color:white;cursor:pointer}
+button:active{opacity:.8}
+.row{display:flex;gap:9px;margin-top:10px}
+.row button{white-space:nowrap}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.chip{padding:6px 12px;border:1px solid #d7dfd3;border-radius:20px;background:#edf1e8;color:var(--green)}
+#status{font-size:14px;color:var(--muted);margin:18px 2px}
+.card h2{font-size:19px;margin:0 0 8px}
+.meta{font-size:13px;color:var(--muted);line-height:1.8}
+.quote{font-size:21px;line-height:2;margin:12px 0}
+.hit{color:#98641d;font-weight:bold;border-bottom:2px solid var(--gold)}
+.meaning{line-height:1.9;margin:8px 0}
+.tag{display:inline-block;background:#edf1e8;color:var(--green);padding:3px 8px;border-radius:5px;font-size:12px;margin-right:5px}
+.links a{display:block;padding:10px 0;color:var(--green);line-height:1.6;border-bottom:1px solid #e5e6de}
+.small{font-size:13px;color:var(--muted);line-height:1.9}
+.empty{line-height:1.9;color:var(--muted)}
+a{overflow-wrap:anywhere}
+footer{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+@media(max-width:480px){h1{font-size:25px}.row{flex-direction:column}.filters{grid-template-columns:1fr}.quote{font-size:19px}}
 </style>
 </head>
 <body>
-<main>
+<header>
+<div class="head">
 <h1>文言尋字</h1>
-<p>輸入一個中文字，查詢它在古文中的例句與意思。</p>
-<input id="word" maxlength="1" placeholder="例如：之">
-<button onclick="searchWord()">查詢</button>
+<p>一字入古文，尋其本義、引申義與語境。<br>從經典例句出發，探索更廣大的古籍世界。</p>
+</div>
+</header>
+<main>
+<section class="panel">
+<label for="word">輸入一個中文字</label>
+<input id="word" maxlength="1" placeholder="例如：之、以、為、其">
+<div class="row">
+<button id="searchBtn">搜尋古文</button>
+<button id="clearBtn" style="background:#e8ebe3;color:#315d4b">清除</button>
+</div>
+<div class="filters">
+<div>
+<label for="category">篇章分類</label>
+<select id="category">
+<option value="全部">全部分類</option>
+<option>經典</option><option>諸子</option><option>史傳</option>
+<option>散文</option><option>詩詞</option>
+</select>
+</div>
+<div>
+<label for="sort">顯示方式</label>
+<select id="sort">
+<option value="all">所有符合例句</option>
+<option value="meaning">按詞義整理</option>
+</select>
+</div>
+</div>
+<div class="chips">
+<button class="chip" data-word="之">之</button>
+<button class="chip" data-word="而">而</button>
+<button class="chip" data-word="以">以</button>
+<button class="chip" data-word="為">為</button>
+<button class="chip" data-word="其">其</button>
+<button class="chip" data-word="者">者</button>
+<button class="chip" data-word="乃">乃</button>
+<button class="chip" data-word="則">則</button>
+<button class="chip" data-word="於">於</button>
+<button class="chip" data-word="也">也</button>
+</div>
+<p class="small">提示：搜尋的是單一字。相同的字可能有代詞、動詞、介詞、連接詞等不同用法。</p>
+</section>
+
+<div id="status" aria-live="polite">請輸入一字，開始探索古文。</div>
 <div id="results"></div>
-<p class="small">學習提示：同一個字在不同句子中，意思可能不同。</p>
+
+<section class="panel">
+<h2>探索大型古籍資料庫</h2>
+<p class="small">若內建例句不足，可以使用以下外部資料庫繼續搜尋。外部搜尋會在另一個頁面開啟。</p>
+<div class="links">
+<a href="https://ctext.org/" target="_blank" rel="noopener">中國哲學書電子化計劃：大量古籍全文、字典與篇章檢索 ↗</a>
+<a href="https://ctext.org/instructions" target="_blank" rel="noopener">中國哲學書電子化計劃：全文與字典搜尋說明 ↗</a>
+<a href="https://ancientchinese.ling.sinica.edu.tw/ASACC_search/" target="_blank" rel="noopener">中央研究院古漢語文獻語料庫：依文獻與語境檢索 ↗</a>
+<a href="https://ancientchinese.ling.sinica.edu.tw/ASACC_manual/" target="_blank" rel="noopener">中央研究院語料庫：檢索使用說明 ↗</a>
+</div>
+<div class="row">
+<button id="ctextBtn">用此字搜尋中國哲學書電子化計劃</button>
+<button id="sinicaBtn" style="background:#526d5c">開啟中央研究院語料庫</button>
+</div>
+</section>
+<section class="panel">
+<h2>閱讀與考證提醒</h2>
+<p class="small">古文會因時代、作者、上下文而有不同解釋。內建解釋是學習用的語境提示，不等同於權威訓詁。重要引用請對照原典、版本與注釋。外部資料庫的內容、翻譯及可用性由各資料庫維護。</p>
+</section>
 </main>
+<footer>文言尋字 · 古籍單字探索工具</footer>
+
 <script>
-const data=[
-["之","論語・學而","學而時習之，不亦說乎？","之：代詞，指所學的內容。白話：學習後按時溫習，不也是很愉快嗎？"],
-["之","論語・為政","知之為知之，不知為不知，是知也。","之：代詞，指所知道的事。白話：知道就是知道，不知道就是不知道，這才是智慧。"],
-["而","論語・學而","學而時習之，不亦說乎？","而：連接詞，可理解為「並且」。"],
-["而","岳陽樓記","感極而悲者矣。","而：連接詞，表示前後相承，可理解為「就」。"],
-["以","出師表","不宜妄自菲薄，引喻失義，以塞忠諫之路也。","以：表示結果，可理解為「以致」。"],
-["其","桃花源記","既出，得其船，便扶向路。","其：代詞，指漁人自己的。"],
-["者","岳陽樓記","予嘗求古仁人之心，或異二者之為。","者：在「二者」中指兩種情況。"],
-["也","論語・為政","知之為知之，不知為不知，是知也。","也：語氣助詞，用於句末，表示判斷或肯定。"],
-["不","論語・學而","學而時習之，不亦說乎？","不：否定副詞，表示不是或沒有。"],
-["人","桃花源記","其中往來種作，男女衣著，悉如外人。","人：人、人物。需依上下文判斷具體含義。"]
+const entries = [
+{w:"之",c:"經典",b:"論語",a:"孔子及其弟子",q:"學而時習之，不亦說乎？",p:"學而",pos:"代詞",m:"指前面所學的內容。",t:"學習之後，並且按時溫習，不也是很愉快嗎？"},
+{w:"之",c:"經典",b:"論語",a:"孔子及其弟子",q:"知之為知之，不知為不知，是知也。",p:"為政",pos:"代詞",m:"指所知道的事情。",t:"知道就是知道，不知道就是不知道，這才是真正的智慧。"},
+{w:"之",c:"諸子",b:"孟子",a:"孟軻",q:"得道者多助，失道者寡助。",p:"公孫丑下",pos:"助詞",m:"本例無「之」字，不作命中資料。",t:""},
+{w:"之",c:"經典",b:"論語",a:"孔子及其弟子",q:"逝者如斯夫，不舍晝夜。",p:"子罕",pos:"助詞",m:"本例無「之」字，不作命中資料。",t:""},
+{w:"而",c:"經典",b:"論語",a:"孔子及其弟子",q:"學而時習之，不亦說乎？",p:"學而",pos:"連接詞",m:"連接前後動作，可理解為「並且」。",t:"學習之後，並且按時溫習，不也是很愉快嗎？"},
+{w:"而",c:"經典",b:"論語",a:"孔子及其弟子",q:"人不知而不慍，不亦君子乎？",p:"學而",pos:"連接詞",m:"表示轉折，可理解為「卻、仍然」。",t:"別人不了解自己，自己卻不因此怨怒，不也是君子嗎？"},
+{w:"而",c:"諸子",b:"孟子",a:"孟軻",q:"得道者多助，失道者寡助。",p:"公孫丑下",pos:"連接詞",m:"本例無「而」字，不作命中資料。",t:""},
+{w:"以",c:"經典",b:"論語",a:"孔子及其弟子",q:"不以言舉人，不以人廢言。",p:"衛靈公",pos:"介詞",m:"表示依據或原因，可理解為「因為、根據」。",t:"不因為一個人的話說得好就推舉他，也不因為某個人不好就否定他說的話。"},
+{w:"以",c:"史傳",b:"史記",a:"司馬遷",q:"項王乃復引兵而東，至東城，乃有二十八騎。",p:"項羽本紀",pos:"介詞",m:"本例無「以」字，不作命中資料。",t:""},
+{w:"以",c:"散文",b:"出師表",a:"諸葛亮",q:"不宜妄自菲薄，引喻失義，以塞忠諫之路也。",p:"前出師表",pos:"連接詞",m:"表示結果，可理解為「以致」。",t:"不應隨意看輕自己、說話不合義理，以致堵塞忠臣進諫的道路。"},
+{w:"為",c:"經典",b:"論語",a:"孔子及其弟子",q:"知之為知之，不知為不知，是知也。",p:"為政",pos:"動詞",m:"表示「是、算作」。",t:"知道就是知道，不知道就是不知道，這才是真正的智慧。"},
+{w:"為",c:"諸子",b:"孟子",a:"孟軻",q:"人皆可以為堯舜。",p:"告子下",pos:"動詞",m:"表示成為、做到。",t:"人人都可以努力成為像堯、舜那樣的人。"},
+{w:"為",c:"散文",b:"桃花源記",a:"陶淵明",q:"不足為外人道也。",p:"桃花源記",pos:"介詞",m:"表示對、向。",t:"不值得向外面的人說起這裡的情況。"},
+{w:"其",c:"散文",b:"桃花源記",a:"陶淵明",q:"既出，得其船，便扶向路，處處誌之。",p:"桃花源記",pos:"代詞",m:"指漁人自己的船。",t:"漁人出來後找到自己的船，便沿著原路返回，一路做下記號。"},
+{w:"其",c:"散文",b:"出師表",a:"諸葛亮",q:"親賢臣，遠小人，此先漢所以興隆也；親小人，遠賢臣，此後漢所以傾頹也。",p:"前出師表",pos:"代詞",m:"本例無「其」字，不作命中資料。",t:""},
+{w:"者",c:"散文",b:"岳陽樓記",a:"范仲淹",q:"予嘗求古仁人之心，或異二者之為。",p:"岳陽樓記",pos:"代詞",m:"在「二者」中指兩種情況。",t:"我曾探求古代仁人的心境，或許不同於以上兩種表現。"},
+{w:"者",c:"散文",b:"醉翁亭記",a:"歐陽脩",q:"望之蔚然而深秀者，琅琊也。",p:"醉翁亭記",pos:"助詞",m:"用在描述性短語後，提示所指事物。",t:"遠望那樹木茂盛、幽深秀麗的地方，就是琅琊山。"},
+{w:"乃",c:"散文",b:"桃花源記",a:"陶淵明",q:"乃不知有漢，無論魏晉。",p:"桃花源記",pos:"副詞",m:"表示竟然、居然。",t:"桃花源中的人竟然不知道有漢朝，更不用說魏晉了。"},
+{w:"則",c:"諸子",b:"孟子",a:"孟軻",q:"入則無法家拂士，出則無敵國外患者，國恆亡。",p:"告子下",pos:"連接詞",m:"表示在某種情況下，可理解為「如果、就」。",t:"一個國家在內沒有守法度的大臣和輔佐君主的賢士，在外沒有敵國與外患，往往就會滅亡。"},
+{w:"於",c:"諸子",b:"孟子",a:"孟軻",q:"生於憂患，死於安樂。",p:"告子下",pos:"介詞",m:"表示原因或處所，可理解為「在、因為」。",t:"人在憂患中得以生存，在安逸享樂中反而可能衰亡。"},
+{w:"也",c:"經典",b:"論語",a:"孔子及其弟子",q:"知之為知之，不知為不知，是知也。",p:"為政",pos:"語氣助詞",m:"用於句末，表示判斷或肯定語氣。",t:"知道就是知道，不知道就是不知道，這才是真正的智慧。"},
+{w:"不",c:"經典",b:"論語",a:"孔子及其弟子",q:"人不知而不慍，不亦君子乎？",p:"學而",pos:"否定副詞",m:"表示否定，可理解為「沒有、不是」。",t:"別人不了解自己，自己卻不因此怨怒，不也是君子嗎？"},
+{w:"人",c:"經典",b:"論語",a:"孔子及其弟子",q:"人不知而不慍，不亦君子乎？",p:"學而",pos:"名詞",m:"指他人、別人。",t:"別人不了解自己，自己卻不因此怨怒，不也是君子嗎？"},
+{w:"道",c:"諸子",b:"論語",a:"孔子及其弟子",q:"朝聞道，夕死可矣。",p:"里仁",pos:"名詞",m:"可指道理、真理或人生之道。",t:"早晨得知真理，即使當晚離世也沒有遺憾。"},
+{w:"仁",c:"經典",b:"論語",a:"孔子及其弟子",q:"仁者愛人。",p:"顏淵",pos:"名詞",m:"儒家重要德目，核心之一是愛人。",t:"有仁德的人會愛護他人。"},
+{w:"故",c:"散文",b:"出師表",a:"諸葛亮",q:"故臨崩寄臣以大事也。",p:"前出師表",pos:"連接詞",m:"表示因果，可理解為「所以、因此」。",t:"因此，先帝在臨終時把國家大事託付給我。"},
+{w:"然",c:"散文",b:"出師表",a:"諸葛亮",q:"然侍衛之臣不懈於內，忠志之士忘身於外。",p:"前出師表",pos:"連接詞",m:"表示轉折，可理解為「然而」。",t:"然而，宮中的侍衛大臣在內毫不懈怠，忠誠有志的將士在外奮不顧身。"},
+{w:"乃",c:"史傳",b:"史記",a:"司馬遷",q:"項王乃復引兵而東。",p:"項羽本紀",pos:"副詞",m:"表示承接，可理解為「於是、便」。",t:"項羽於是再次帶兵向東進發。"}
 ];
-function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function searchWord(){
-let w=document.getElementById('word').value.trim();
-let out=document.getElementById('results');
-if(!w){out.innerHTML='<p>請先輸入一個中文字。</p>';return}
-w=[...w][0];
-let hits=data.filter(x=>x[0]===w&&x[2].includes(w));
-if(!hits.length){out.innerHTML='<p>目前示範資料中沒有找到此字。請試試：之、而、以、其、者、也、不、人。</p>';return}
-out.innerHTML='<h2>「'+esc(w)+'」的搜尋結果</h2>'+hits.map(x=>'<section class="card"><b>'+esc(x[1])+'</b><p>'+esc(x[2]).replaceAll(w,'<span class="hit">'+esc(w)+'</span>')+'</p><p>'+x[3]+'</p></section>').join('');
+
+const invalid=entries.filter(e=>!e.q.includes(e.w));
+const valid=entries.filter(e=>e.q.includes(e.w));
+
+function esc(s){
+return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-document.getElementById('word').addEventListener('keydown',e=>{if(e.key==='Enter')searchWord()});
+function highlight(s,w){
+const i=s.indexOf(w);
+if(i<0)return esc(s);
+return esc(s.slice(0,i))+'<span class="hit">'+esc(w)+'</span>'+esc(s.slice(i+w.length));
+}
+let current="";
+function search(){
+const w=document.getElementById("word").value.trim();
+const cat=document.getElementById("category").value;
+const results=document.getElementById("results");
+if(!w){document.getElementById("status").textContent="請先輸入一個中文字。";results.innerHTML="";return;}
+current=[...w][0];
+document.getElementById("word").value=current;
+let found=valid.filter(e=>e.w===current&&(cat==="全部"||e.c===cat));
+document.getElementById("status").textContent="「"+current+"」：找到 "+found.length+" 筆內建例句。內建資料為精選示範，並非完整古籍索引。";
+if(!found.length){
+results.innerHTML='<section class="card empty">內建資料暫時沒有找到這個字的例句。<br>你仍可使用下方大型古籍資料庫搜尋完整文獻。</section>';
+return;
+}
+if(document.getElementById("sort").value==="meaning"){
+found.sort((a,b)=>a.pos.localeCompare(b.pos,"zh-Hant"));
+}
+results.innerHTML=found.map((e,i)=>`
+<section class="card">
+<h2>${esc(e.b)} · ${esc(e.p)}</h2>
+<div class="meta">分類：${esc(e.c)}　｜　作者／出處：${esc(e.a)}</div>
+<div><span class="tag">${esc(e.pos)}</span><span class="tag">語境釋義</span></div>
+<p class="quote">${highlight(e.q,current)}</p>
+<p class="meaning"><b>此字的意思：</b>${esc(e.m)}</p>
+<p class="meaning"><b>白話解釋：</b>${esc(e.t)}</p>
+</section>`).join("");
+}
+function openCtext(){
+if(!current){alert("請先輸入一個中文字並搜尋。");return;}
+window.open("https://ctext.org/dictionary.pl?if=zh&char="+encodeURIComponent(current),"_blank","noopener");
+}
+document.getElementById("searchBtn").addEventListener("click",search);
+document.getElementById("word").addEventListener("keydown",e=>{if(e.key==="Enter")search();});
+document.getElementById("clearBtn").addEventListener("click",()=>{
+document.getElementById("word").value="";
+document.getElementById("results").innerHTML="";
+document.getElementById("status").textContent="請輸入一字，開始探索古文。";
+current="";
+});
+document.querySelectorAll("[data-word]").forEach(b=>b.addEventListener("click",()=>{
+document.getElementById("word").value=b.dataset.word;search();
+}));
+document.getElementById("ctextBtn").addEventListener("click",openCtext);
+document.getElementById("sinicaBtn").addEventListener("click",()=>{
+window.open("https://ancientchinese.ling.sinica.edu.tw/ASACC_search/","_blank","noopener");
+});
 </script>
 </body>
 </html>
