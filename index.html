@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文言尋字</title>
+<style>
+body{font-family:serif;background:#f7f5ee;color:#20332d;margin:0;padding:22px}
+main{max-width:720px;margin:auto}
+h1{color:#315d4b}
+input,button{font-size:18px;padding:12px;border-radius:8px}
+input{width:55%;border:1px solid #bbb}
+button{background:#315d4b;color:white;border:0}
+.card{background:white;padding:18px;margin:14px 0;border-radius:12px;line-height:1.9}
+.hit{color:#b0782c;font-weight:bold}
+.small{color:#68766f}
+</style>
+</head>
+<body>
+<main>
+<h1>文言尋字</h1>
+<p>輸入一個中文字，查詢它在古文中的例句與意思。</p>
+<input id="word" maxlength="1" placeholder="例如：之">
+<button onclick="searchWord()">查詢</button>
+<div id="results"></div>
+<p class="small">學習提示：同一個字在不同句子中，意思可能不同。</p>
+</main>
+<script>
+const data=[
+["之","論語・學而","學而時習之，不亦說乎？","之：代詞，指所學的內容。白話：學習後按時溫習，不也是很愉快嗎？"],
+["之","論語・為政","知之為知之，不知為不知，是知也。","之：代詞，指所知道的事。白話：知道就是知道，不知道就是不知道，這才是智慧。"],
+["而","論語・學而","學而時習之，不亦說乎？","而：連接詞，可理解為「並且」。"],
+["而","岳陽樓記","感極而悲者矣。","而：連接詞，表示前後相承，可理解為「就」。"],
+["以","出師表","不宜妄自菲薄，引喻失義，以塞忠諫之路也。","以：表示結果，可理解為「以致」。"],
+["其","桃花源記","既出，得其船，便扶向路。","其：代詞，指漁人自己的。"],
+["者","岳陽樓記","予嘗求古仁人之心，或異二者之為。","者：在「二者」中指兩種情況。"],
+["也","論語・為政","知之為知之，不知為不知，是知也。","也：語氣助詞，用於句末，表示判斷或肯定。"],
+["不","論語・學而","學而時習之，不亦說乎？","不：否定副詞，表示不是或沒有。"],
+["人","桃花源記","其中往來種作，男女衣著，悉如外人。","人：人、人物。需依上下文判斷具體含義。"]
+];
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function searchWord(){
+let w=document.getElementById('word').value.trim();
+let out=document.getElementById('results');
+if(!w){out.innerHTML='<p>請先輸入一個中文字。</p>';return}
+w=[...w][0];
+let hits=data.filter(x=>x[0]===w&&x[2].includes(w));
+if(!hits.length){out.innerHTML='<p>目前示範資料中沒有找到此字。請試試：之、而、以、其、者、也、不、人。</p>';return}
+out.innerHTML='<h2>「'+esc(w)+'」的搜尋結果</h2>'+hits.map(x=>'<section class="card"><b>'+esc(x[1])+'</b><p>'+esc(x[2]).replaceAll(w,'<span class="hit">'+esc(w)+'</span>')+'</p><p>'+x[3]+'</p></section>').join('');
+}
+document.getElementById('word').addEventListener('keydown',e=>{if(e.key==='Enter')searchWord()});
+</script>
+</body>
+</html>
